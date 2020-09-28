@@ -1,11 +1,14 @@
 package com.travelblog;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,6 +20,7 @@ public class LoginActivity extends AppCompatActivity {
     private TextInputLayout textUsernameLayout;
     private TextInputLayout textPasswordLayout;
     private Button loginButton;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -25,6 +29,7 @@ public class LoginActivity extends AppCompatActivity {
 
         textUsernameLayout = findViewById(R.id.textUsernameLayout);
         textPasswordLayout = findViewById(R.id.textPasswordLayout);
+        progressBar = findViewById(R.id.progressBar);
         loginButton = findViewById(R.id.loginButton);
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -45,9 +50,30 @@ public class LoginActivity extends AppCompatActivity {
         String username = textUsernameLayout.getEditText().getText().toString();
         String password = textPasswordLayout.getEditText().getText().toString();
 
+        // input validation
         if (username.isEmpty()) textUsernameLayout.setError("Username must not be empty");
-        if (password.isEmpty()) textPasswordLayout.setError("Password must not be empty");
+        else if (password.isEmpty()) textPasswordLayout.setError("Password must not be empty");
         else if (!username.equals("admin") || !password.equals("admin")) showErrorDialog();
+        else performLogin();
+    }
+
+    private void performLogin() {
+        textUsernameLayout.setEnabled(false);
+        textPasswordLayout.setEnabled(false);
+        loginButton.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
+
+        // simulate long-running activity (in this case an http call)
+        Handler handler = new Handler();
+        handler.postDelayed(() -> {
+            startMainActivity();
+            finish();
+        }, 2000);
+    }
+
+    private void startMainActivity() {
+        Intent i = new Intent(this, MainActivity.class);
+        startActivity(i);
     }
 
     private void showErrorDialog() {
@@ -58,6 +84,7 @@ public class LoginActivity extends AppCompatActivity {
                 .show();
     }
 
+    // reset error dialog once user enters text
     private TextWatcher createTextWatcher(final TextInputLayout textLayout) {
         return new TextWatcher() {
             @Override
